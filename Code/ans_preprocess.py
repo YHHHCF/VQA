@@ -69,30 +69,27 @@ def encode_answer(vqa, top_answers, save_path, top_num):
                 embed_ans.append(idx)
 
         embed_ans = np.array(embed_ans)
-        embed_ans = np.sort(embed_ans)
-        vec_ans = np.full((10, 2), -1)
+        embed_ans = np.sort(embed_ans)  # <= 10 sorted index of answers(less than 10 if some answer not in top answers)
 
-        mark = 0
-        for ele in embed_ans:
-            if ele in vec_ans[:, 0]:
-                idx = np.where(vec_ans == ele)[0][0]
-                vec_ans[idx][1] += 1
-            else:
-                vec_ans[mark][0] = ele
-                vec_ans[mark][1] = 1
-                mark += 1
+        # if all the answers are not in the top answers, index the gt answer to be top_num
+        if len(embed_ans) == 0:
+            embed_answers[q_id] = top_num
 
-        # sort according to the count
-        vec_ans = -vec_ans
-        vec_ans_sorted = vec_ans[vec_ans[:, 1].argsort()]
-        vec_ans_sorted = -vec_ans_sorted
+        # else find the answer with the highest count and let it be the gt answer
+        else:
+            start_pos = 0
+            max_idx = embed_ans[0]
+            max_len = 0
 
-        # if all are -1, then replace the first row with (top_num, 10), meaning the answer is unknown
-        if vec_ans_sorted[0][0] == -1:
-            vec_ans_sorted[0][0] = top_num
-            vec_ans_sorted[0][1] = 10
+            for pos in range(len(embed_ans)):
+                if embed_ans[pos] != embed_ans[start_pos]:
+                    length = pos - start_pos
+                    if length > max_len:
+                        max_len = length
+                        max_idx = embed_ans[start_pos]
+                    start_pos = pos
 
-        embed_answers[q_id] = vec_ans_sorted
+            embed_answers[q_id] = max_idx
 
     # save the answer embedding as dictionary, key is answer_id, value is list ids
     np.savez(save_path, embed_answers)
