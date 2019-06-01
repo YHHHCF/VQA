@@ -20,6 +20,7 @@ import json
 import datetime
 import copy
 
+
 class VQA:
 	def __init__(self, annotation_file=None, question_file=None):
 		"""
@@ -33,34 +34,46 @@ class VQA:
 		self.qa = {}
 		self.qqa = {}
 		self.imgToQA = {}
-		if not annotation_file == None and not question_file == None:
-			print('loading VQA annotations and questions into memory...')
-			time_t = datetime.datetime.utcnow()
+
+		print('create a vqa object')
+		if annotation_file:
 			dataset = json.load(open(annotation_file, 'r'))
-			questions = json.load(open(question_file, 'r'))
-			print(datetime.datetime.utcnow() - time_t)
 			self.dataset = dataset
+
+		if question_file:
+			questions = json.load(open(question_file, 'r'))
 			self.questions = questions
+
+		if annotation_file or question_file:
 			self.createIndex()
 
 	# create qa, qqa and imgToQA
 	def createIndex(self):
-		# create index
-		print('creating index...')
-		imgToQA = {ann['image_id']: [] for ann in self.dataset['annotations']}
-		qa = {ann['question_id']: [] for ann in self.dataset['annotations']}
-		qqa = {ann['question_id']: [] for ann in self.dataset['annotations']}
-		for ann in self.dataset['annotations']:
-			imgToQA[ann['image_id']] += [ann]
-			qa[ann['question_id']] = ann
-		for ques in self.questions['questions']:
-			qqa[ques['question_id']] = ques
-		print('index created!')
+		if len(self.dataset) > 0:  # annotation is initialized
+			# create index
+			imgToQA = {ann['image_id']: [] for ann in self.dataset['annotations']}  # all image_id in annotations
+			qa = {ann['question_id']: [] for ann in self.dataset['annotations']}  # all question_id in annotations
+			qqa = {ann['question_id']: [] for ann in self.dataset['annotations']}  # all question_id in annotations
+			for ann in self.dataset['annotations']:
+				imgToQA[ann['image_id']] += [ann]
+				qa[ann['question_id']] = ann
+			for ques in self.questions['questions']:
+				qqa[ques['question_id']] = ques
+			print('index created with annotation!')
 
-		# create class members
-		self.qa = qa
-		self.qqa = qqa
-		self.imgToQA = imgToQA
+			# create class members
+			self.qa = qa
+			self.qqa = qqa
+			self.imgToQA = imgToQA
+
+		else:  # annotation is not initialized(for test vqa)
+			qqa = {ques['question_id']: [] for ques in self.questions['questions']}  # only init qqa
+			for ques in self.questions['questions']:
+				qqa[ques['question_id']] = ques
+			print('index created with question!')
+
+			# create class members
+			self.qqa = qqa
 
 	def info(self):
 		"""
