@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo Create folders
+mkdir Questions
+mkdir Annotations
+mkdir Images
+
+cd ./Questions
+echo Download train/val/test Questions
+wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Train_mscoco.zip
+wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Val_mscoco.zip
+wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Test_mscoco.zip
+unzip '*.zip'
+rm *.zip
+
+cd ../Annotations
+echo Download train/val Annotations
+wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Train_mscoco.zip
+wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip
+unzip '*.zip'
+rm *.zip
+
+cd ../Images
+echo Download train Images
+wget http://images.cocodataset.org/zips/train2014.zip
+echo Download val Images
+wget http://images.cocodataset.org/zips/val2014.zip
+echo Download test Images
+wget http://images.cocodataset.org/zips/test2015.zip
+unzip '*.zip'
