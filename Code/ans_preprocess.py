@@ -14,7 +14,7 @@ def get_top_ans(ans_path, train_vqa, val_vqa, top_num):
     ans_cnt = {}  # a dictionary to count all the answers
 
     # count the number of all train/val answers and get top_num answers
-    for q_id in train_qa.keys:
+    for q_id in train_qa.keys():
         answers = train_qa[q_id]['answers']
         all_ans.append(answers)
         for i in range(10):
@@ -24,7 +24,7 @@ def get_top_ans(ans_path, train_vqa, val_vqa, top_num):
             else:
                 ans_cnt[single_ans] = 1
 
-    for q_id in val_qa.keys:
+    for q_id in val_qa.keys():
         answers = val_qa[q_id]['answers']
         all_ans.append(answers)
         for i in range(10):

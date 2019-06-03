@@ -20,8 +20,9 @@ def get_top_vocab(vocab_path, train_vqa, val_vqa, top_num):
 
     # get vocabulary
     vectorizer = CountVectorizer(max_features=top_num, vocabulary=None)
-
+    vectorizer.fit_transform(ques_all)
     vocabulary = vectorizer.get_feature_names()
+
     np.savez(vocab_path, vocabulary)
     print("Saved a vocabulary with length {}".format(len(vocabulary)))
     return vocabulary
