@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torchvision.models as models
 import variables as var
@@ -32,7 +31,7 @@ class BaselineCNN(nn.Module):
 
     def forward(self, x):
         embedding = self.layers(x)
-        embedding = embedding.reshape(embedding.shape[1], -1)
+        embedding = embedding.reshape(embedding.shape[0], embedding.shape[1])
 
         return embedding
 

@@ -1,18 +1,58 @@
-import variables as var
-import baseline
-import torch
 import torch.nn as nn
 from data_loader import *
 import baseline
 
 
-#
-def train(model, loader):
-    raise NotImplemented
+def train(model, train_loader, val_loader):
+    for e in range(var.epoch):
+        for bID, data in enumerate(train_loader):
+            print(bID)
+
+            imgs = data['img'].to(var.device)
+            ques = data['ques'].to(var.device)
+            ans = data['ans'].to(var.device)
+
+            pred = model(imgs, ques)
+            loss = criterion(pred, ans)
+
+            print(loss)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        loss, acc = val(model, val_loader)
+        print("Epoch {}: loss is {}, acc is {}".format(e, loss, acc))
 
 
 def val(model, loader):
-    raise NotImplemented
+    model.eval()
+    with torch.no_grad():
+        cnt = 0
+        acc = 0.0
+        loss = 0.0
+
+        for bID, data in enumerate(loader):
+            imgs = data['img'].to(var.device)
+            ques = data['ques'].to(var.device)
+            ans = data['ans'].to(var.device)
+
+            pred = model(imgs, ques)
+            loss += criterion(pred, ans)
+
+            # use a different metric to calculate acc here (count whether the prediction meets the best answer)
+            pred_idx = torch.argmax(pred, 1)
+            acc += sum(pred_idx == ans)
+
+            cnt += len(ans)
+
+        acc = float(acc)
+        acc /= cnt
+        loss /= cnt
+
+    model.train()
+
+    return acc, loss
 
 
 if __name__ == "__main__":
@@ -26,30 +66,14 @@ if __name__ == "__main__":
     #                            var.train_ann_path, var.train_ans_idxs_path)
 
     val_set = VqaDataset(var.val_img_path, var.val_img_name_pattern,
-                             var.val_ques_path, var.val_ques_embedding_path,
-                             var.val_ann_path, var.val_ans_idxs_path)
+                         var.val_ques_path, var.val_ques_embedding_path,
+                         var.val_ann_path, var.val_ans_idxs_path)
 
     # data_loader for train/val VQA
     # train_loader = DataLoader(train_set, batch_size=var.train_batch_size, shuffle=True,
     #                               num_workers=var.num_workers)
     val_loader = DataLoader(val_set, batch_size=var.val_batch_size, shuffle=False, num_workers=var.num_workers)
 
-    baselineModel = baseline.BaselineModel()
-    baselineModel.to(var.device)
+    model.to(var.device)
 
-    for e in range(var.epoch):
-        for batch_id, batch_data in enumerate(val_loader):
-            print(batch_id)
-
-            imgs = batch_data['img'].to(var.device)
-            ques = batch_data['ques'].to(var.device)
-            ans = batch_data['ans'].to(var.device)
-
-            pred = baselineModel(imgs, ques)
-            loss = criterion(pred, ans)
-
-            print(loss)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+    train(model, val_loader, val_loader)

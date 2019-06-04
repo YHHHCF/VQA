@@ -2,7 +2,7 @@
 import sys
 dataDir = '../../../VQA'
 sys.path.insert(0, '%s/PythonHelperTools/vqaTools' %(dataDir))
-from vqa import VQA
+from PythonHelperTools.vqaTools.vqa import VQA
 from vqaEvaluation.vqaEval import VQAEval
 import matplotlib.pyplot as plt
 import skimage.io as io
