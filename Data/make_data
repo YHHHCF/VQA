@@ -4,6 +4,7 @@ echo Create folders
 mkdir Questions
 mkdir Annotations
 mkdir Images
+mkdir ../Model/
 
 cd ./Questions
 echo Download train/val/test Questions
