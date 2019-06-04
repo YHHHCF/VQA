@@ -94,6 +94,9 @@ class VqaDataset(Dataset):
         ans = self.ans_idxs[q_id]
         item['ans'] = torch.tensor(ans)
 
+        # put question id into item, used for evaluation
+        item['qID'] = q_id
+
         return item
 
     # get image path from image_id
@@ -110,30 +113,35 @@ class VqaDataset(Dataset):
 # check whether the parameters of the model has changed
 def print_model(model):
     params = model.state_dict()
-    cnt = 0
-    for key in params.keys():
-        if cnt < 20:
-            print(key, torch.max(params[key]))
-            cnt += 1
+    key_1 = list(params.keys())[:10]
+    key_2 = list(params.keys())[-10:]
+
+    for key in key_1:
+        print(key, torch.max(params[key]))
+
+    for key in key_2:
+        print(key, torch.max(params[key]))
 
 
 # save the parameters of the model
-def save_ckpt(model, loss, acc, path):
+def save_ckpt(model, optimizer, loss, acc, path):
     torch.save({
         'param': model.state_dict(),
+        'optim': optimizer.state_dict(),
         'loss': loss,
         'acc': acc,
     }, path)
     return
 
 
-# load the parameters from a ckpt to a model
-def load_ckpt(path, model):
+# load the parameters from a ckpt to a model and optimizer
+def load_ckpt(model, optimizer, path):
     ckpt = torch.load(path)
-    print("Loss is {}, accuracy is {}".format(ckpt['loss'], ckpt['acc']))
+    print("Pre-trained loss is {}, accuracy is {}".format(ckpt['loss'], ckpt['acc']))
 
     model.load_state_dict(ckpt['param'])
-    return model
+    optimizer.load_state_dict(ckpt['optim'])
+    return model, optimizer
 
 
 def load_file(path):

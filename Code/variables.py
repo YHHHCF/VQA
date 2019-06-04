@@ -45,8 +45,17 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # experiment configuration
 epoch = 60
-train_batch_size = 2
-val_batch_size = 2
+train_batch_size = 16
+val_batch_size = 16
 num_workers = 8
 lr = 1e-3
 wd = 1e-5
+
+# experiment model path
+model_dir = '../Model/'
+experiment = 'exp1'
+model_name = 'model.pt'
+
+# experiment result path
+result_dir = '../Result'
+result_name = 'result.json'
