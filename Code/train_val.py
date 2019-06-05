@@ -1,9 +1,10 @@
 import torch.nn as nn
 from data_loader import *
 import baseline
+from tensorboardX import SummaryWriter
 
 
-def train(model, optimizer, criterion, train_loader, val_loader):
+def train(model, optimizer, criterion, train_loader, val_loader, writer):
     for e in range(var.epoch):
         for bID, data in enumerate(train_loader):
             imgs = data['img'].to(var.device)
@@ -13,12 +14,16 @@ def train(model, optimizer, criterion, train_loader, val_loader):
             pred = model(imgs, ques)
             loss = criterion(pred, ans)
 
+            writer.add_scalar('train/loss', loss.item(), bID)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-        loss, acc = val(model, criterion, val_loader)
-        print("Epoch {}: loss is {}, acc is {}".format(e, loss, acc))
+        val_loss, val_acc = val(model, criterion, val_loader)
+        print("Epoch {}: loss is {}, acc is {}".format(e, val_loss, val_acc))
+        writer.add_scalar('val/loss', val_loss.item(), bID)
+        writer.add_scalar('val/acc', val_acc.item(), bID)
 
         # save model
         dir = os.path.join(var.model_dir, var.experiment, str(e))
@@ -27,7 +32,7 @@ def train(model, optimizer, criterion, train_loader, val_loader):
             os.makedirs(dir)
 
         path = os.path.join(dir, var.model_name)
-        save_ckpt(model, optimizer, loss, acc, path)
+        save_ckpt(model, optimizer, val_loss.item(), val_acc.item(), path)
 
 
 def val(model, criterion, loader):
@@ -83,4 +88,6 @@ if __name__ == "__main__":
 
     model.to(var.device)
 
-    train(model, optimizer, criterion, val_loader, val_loader)
+    writer = SummaryWriter()
+
+    train(model, optimizer, criterion, val_loader, val_loader, writer)

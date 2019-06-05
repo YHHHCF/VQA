@@ -4,6 +4,7 @@ import json
 import baseline
 from data_loader import *
 import variables as var
+from vqaEvaluation.vqaEval import VQAEval
 
 
 # get the result file by running a vqa on a pre-trained vqa model
@@ -52,8 +53,10 @@ def calculate_json_result(model, loader, epoch):
 # compute standard accuracy and perform analysis based on result file and annotation
 def calculate_acc(vqa, resFile, quesFile):
     vqaRes = vqa.loadRes(resFile, quesFile)
-    
-    acc = None
+    vqaEval = VQAEval(vqa, vqaRes, n=2)
+    vqaEval.evaluate()
+
+    acc = vqaEval.accuracy['overall']
     return acc
 
 
