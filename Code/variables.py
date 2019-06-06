@@ -45,9 +45,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # experiment configuration
 epoch = 60
-train_batch_size = 16
-val_batch_size = 16
-num_workers = 8
+train_batch_size = 256
+val_batch_size = 256
+num_workers = 16
 lr = 1e-3
 wd = 1e-5
 
