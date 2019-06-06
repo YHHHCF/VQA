@@ -22,10 +22,9 @@ train_ann_path = os.path.join(data_path, 'Annotations', 'v2_mscoco_train2014_ann
 val_ann_path = os.path.join(data_path, 'Annotations', 'v2_mscoco_val2014_annotations.json')
 
 # paths for preprocessed images (before going through CNN)
-train_img_proc_path = os.path.join(data_path, 'Images', 'train_img_proc.npz')
-val_img_proc_path = os.path.join(data_path, 'Images', 'val_img_proc.npz')
-test_dev_img_proc_path = os.path.join(data_path, 'Images', 'test_dev_img_proc.npz')
-test_std_img_proc_path = os.path.join(data_path, 'Images', 'test_std_proc.npz')
+train_img_proc_dir = os.path.join(data_path, 'Images', 'train')
+val_img_proc_dir = os.path.join(data_path, 'Images', 'val')
+test_img_proc_dir = os.path.join(data_path, 'Images', 'test')
 
 # paths for question embeddings
 train_ques_embedding_path = os.path.join(data_path, 'Questions', 'train_ques_embedding.npz')

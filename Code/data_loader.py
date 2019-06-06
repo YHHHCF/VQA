@@ -11,7 +11,7 @@ import datetime
 import numpy as np
 
 # resize and normalize training image before feeding into CNN
-img_norm = trans.Compose([trans.Resize((224, 224)),
+img_norm = trans.Compose([trans.Resize((256, 256)),
                           trans.ToTensor(),
                           trans.Normalize(mean=[0.485, 0.456, 0.406],
                                           std=[0.229, 0.224, 0.225])])
@@ -21,18 +21,19 @@ img_norm = trans.Compose([trans.Resize((224, 224)),
 def get_im(path):
     img = Image.open(path).convert("RGB")
     img = img_norm(img)
+    # img = torch.tensor(img, dtype=torch.float16)
     return img
 
 
 # the dataset of VQA
 class VqaDataset(Dataset):
-    def __init__(self, img_dir, img_name_pattern, img_proc_path, ques_path, ques_embedding_path,
+    def __init__(self, img_dir, img_name_pattern, ques_path, ques_embedding_path,
                  ann_path=None, ans_idxs_path=None):
         """
         Args:
             img_dir: Path to the directory with COCO images
             img_name_pattern: (eg "COCO_train2014_{}.jpg")
-            img_proc_path: preprocessed image path
+            img_proc_dir: preprocessed image dir
             ques_path: Path to question data json file
             ques_embedding_path: Path to question embedding
             ann_path: Path to annotations mapping images, questions, and answers together
@@ -44,14 +45,17 @@ class VqaDataset(Dataset):
         self.img_name_pattern = img_name_pattern
 
         # load and resize all the images
-        self.images = {}
+        # self.images = {}
         image_ids = list(set(self.vqa.getImgIds()))  # all the image ids
 
         time_t = datetime.datetime.utcnow()
 
+        img_proc_dir = os.path.join(img_dir, 'pre_process')
+
         # if img is not preprocessed, process it and save to disk
-        if not os.path.exists(img_proc_path):
+        if not os.path.exists(img_proc_dir):
             print("this line should only appear in img pre-processing!")
+            os.makedirs(img_proc_dir)
             cnt = 0
             for img_id in image_ids:
                 if cnt % 1000 == 0:
@@ -59,15 +63,17 @@ class VqaDataset(Dataset):
                 cnt += 1
                 img_path = self.get_im_path(img_id)
                 img = get_im(img_path)
-                self.images[img_id] = img
+
+                torch.save(img, os.path.join(img_proc_dir, str(img_id) + '.pt'))
+                # self.images[img_id] = img
 
             # save to disk
-            np.savez(img_proc_path, self.images)
+            # np.savez(img_proc_path, self.images)
 
         # if img is preprocessed, load it from disk
-        else:
+        # else:
             # load from disk
-            self.images = load_dict(img_proc_path)
+            # self.images, _ = load_dict(img_proc_path)
 
         print('Image loaded (t=%0.2fs)' % ((datetime.datetime.utcnow() - time_t).total_seconds()))
 
@@ -95,7 +101,9 @@ class VqaDataset(Dataset):
 
         # get image
         img_id = self.vqa.getImgIds(quesIds=[q_id])[0]
-        item['img'] = self.images[img_id]
+        # item['img'] = self.images[img_id]
+        item['img'] = torch.load(os.path.join(self.img_dir, 'pre_process', str(img_id) + '.pt'))
+        # item['img'] = torch.tensor(self.images[img_id], dtype=torch.float32)
 
         # get questions
         ques = self.ques_embedding[q_id]
@@ -181,10 +189,9 @@ if __name__ == "__main__":
     ann_path = var.val_ann_path
     ans_idxs_path = var.val_ans_idxs_path
     img_name_pattern = var.val_img_name_pattern
-    img_proc_path = var.val_img_proc_path
 
     # dataset for VQA
-    dataset = VqaDataset(img_dir, img_name_pattern, img_proc_path, ques_path, ques_embbed_path, ann_path, ans_idxs_path)
+    dataset = VqaDataset(img_dir, img_name_pattern, ques_path, ques_embbed_path, ann_path, ans_idxs_path)
 
     # dataloader for VQA
     loader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=16)
