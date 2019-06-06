@@ -64,7 +64,7 @@ if __name__ == "__main__":
     model = baseline.BaselineModel()
     criterion = nn.CrossEntropyLoss()
 
-    eval_set = VqaDataset(var.val_img_path, var.val_img_name_pattern,
+    eval_set = VqaDataset(var.val_img_path, var.val_img_name_pattern, var.val_img_proc_path,
                          var.val_ques_path, var.val_ques_embedding_path,
                          var.val_ann_path, var.val_ans_idxs_path)
 

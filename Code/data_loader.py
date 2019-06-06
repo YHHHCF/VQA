@@ -26,12 +26,13 @@ def get_im(path):
 
 # the dataset of VQA
 class VqaDataset(Dataset):
-    def __init__(self, img_dir, img_name_pattern, ques_path, ques_embedding_path,
+    def __init__(self, img_dir, img_name_pattern, img_proc_path, ques_path, ques_embedding_path,
                  ann_path=None, ans_idxs_path=None):
         """
         Args:
             img_dir: Path to the directory with COCO images
             img_name_pattern: (eg "COCO_train2014_{}.jpg")
+            img_proc_path: preprocessed image path
             ques_path: Path to question data json file
             ques_embedding_path: Path to question embedding
             ann_path: Path to annotations mapping images, questions, and answers together
@@ -47,14 +48,26 @@ class VqaDataset(Dataset):
         image_ids = list(set(self.vqa.getImgIds()))  # all the image ids
 
         time_t = datetime.datetime.utcnow()
-        cnt = 0
-        for img_id in image_ids:
-            if cnt % 1000 == 0:
-                print(cnt)
-            cnt += 1
-            img_path = self.get_im_path(img_id)
-            img = get_im(img_path)
-            self.images[img_id] = img
+
+        # if img is not preprocessed, process it and save to disk
+        if not os.path.exists(img_proc_path):
+            print("this line should only appear in img pre-processing!")
+            cnt = 0
+            for img_id in image_ids:
+                if cnt % 1000 == 0:
+                    print(cnt)
+                cnt += 1
+                img_path = self.get_im_path(img_id)
+                img = get_im(img_path)
+                self.images[img_id] = img
+
+            # save to disk
+            np.savez(img_proc_path, self.images)
+
+        # if img is preprocessed, load it from disk
+        else:
+            # load from disk
+            self.images = load_dict(img_proc_path)
 
         print('Image loaded (t=%0.2fs)' % ((datetime.datetime.utcnow() - time_t).total_seconds()))
 
@@ -168,9 +181,10 @@ if __name__ == "__main__":
     ann_path = var.val_ann_path
     ans_idxs_path = var.val_ans_idxs_path
     img_name_pattern = var.val_img_name_pattern
+    img_proc_path = var.val_img_proc_path
 
     # dataset for VQA
-    dataset = VqaDataset(img_dir, img_name_pattern, ques_path, ques_embbed_path, ann_path, ans_idxs_path)
+    dataset = VqaDataset(img_dir, img_name_pattern, img_proc_path, ques_path, ques_embbed_path, ann_path, ans_idxs_path)
 
     # dataloader for VQA
     loader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=16)
