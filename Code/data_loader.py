@@ -45,7 +45,6 @@ class VqaDataset(Dataset):
         self.img_name_pattern = img_name_pattern
 
         # load and resize all the images
-        # self.images = {}
         image_ids = list(set(self.vqa.getImgIds()))  # all the image ids
 
         time_t = datetime.datetime.utcnow()
@@ -65,15 +64,6 @@ class VqaDataset(Dataset):
                 img = get_im(img_path)
 
                 torch.save(img, os.path.join(img_proc_dir, str(img_id) + '.pt'))
-                # self.images[img_id] = img
-
-            # save to disk
-            # np.savez(img_proc_path, self.images)
-
-        # if img is preprocessed, load it from disk
-        # else:
-            # load from disk
-            # self.images, _ = load_dict(img_proc_path)
 
         print('Image loaded (t=%0.2fs)' % ((datetime.datetime.utcnow() - time_t).total_seconds()))
 
@@ -101,9 +91,7 @@ class VqaDataset(Dataset):
 
         # get image
         img_id = self.vqa.getImgIds(quesIds=[q_id])[0]
-        # item['img'] = self.images[img_id]
         item['img'] = torch.load(os.path.join(self.img_dir, 'pre_process', str(img_id) + '.pt'))
-        # item['img'] = torch.tensor(self.images[img_id], dtype=torch.float32)
 
         # get questions
         ques = self.ques_embedding[q_id]

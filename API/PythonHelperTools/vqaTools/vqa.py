@@ -96,7 +96,10 @@ class VQA:
 		ansTypes = ansTypes if type(ansTypes) == list else [ansTypes]
 
 		if len(imgIds) == len(quesTypes) == len(ansTypes) == 0:
-			anns = self.dataset['annotations']
+			if len(self.dataset) > 0:
+				anns = self.dataset['annotations']
+			else:
+				anns = self.questions['questions']
 		else:
 			if not len(imgIds) == 0:
 				anns = sum([self.imgToQA[imgId] for imgId in imgIds if imgId in self.imgToQA],[])
@@ -120,7 +123,10 @@ class VQA:
 		ansTypes = ansTypes if type(ansTypes) == list else [ansTypes]
 
 		if len(quesIds) == len(quesTypes) == len(ansTypes) == 0:
-			anns = self.dataset['annotations']
+			if len(self.dataset) > 0:
+				anns = self.dataset['annotations']
+			else:
+				anns = self.questions['questions']
 		else:
 			if not len(quesIds) == 0:
 				anns = [self.qa[quesId] for quesId in quesIds if quesId in self.qa]
