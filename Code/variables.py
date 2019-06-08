@@ -36,31 +36,11 @@ ques_vocab_path = os.path.join(data_path, 'Questions', 'ques_vocab.npz')
 # path for top answers
 top_ans_path = os.path.join(data_path, 'Annotations', 'top_answers.npz')
 
-# experiment related
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# vocabulary and answer size in the following experiments
 top_vocab_num = 3000
 top_ans_num = 3000
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# experiment configuration
-epoch = 30
-train_batch_size = 128
-val_batch_size = 128
-num_workers = 16
-lr = 3e-5
-wd = 1e-5
-
-# experiment model path
 model_dir = '../Model/'
-experiment = 'exp1'
 model_name = 'model.pt'
-
-# experiment result path
-result_dir = '../Result'
-result_name = 'result.json'
-
-# config
-if_pretrain = False
-pretrain_exp = 'exp1'
-pretrain_epoch = '0'
-ckpt_path = os.path.join(model_dir, pretrain_exp, pretrain_epoch, model_name)

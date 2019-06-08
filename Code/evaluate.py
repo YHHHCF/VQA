@@ -5,6 +5,7 @@ import baseline
 from data_loader import *
 import variables as var
 from vqaEvaluation.vqaEval import VQAEval
+import config.eval_cf as cfg
 
 
 # get the result file by running a vqa on a pre-trained vqa model
@@ -37,12 +38,12 @@ def calculate_json_result(model, loader, epoch):
         result['answer'] = top_ans[qaRes[key]]
         results.append(result)
 
-    dir = os.path.join(var.result_dir, var.experiment, str(epoch))
+    dir = os.path.join(cfg.result_dir, str(cfg.experiment), str(epoch))
 
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-    path = os.path.join(dir, var.result_name)
+    path = os.path.join(dir, cfg.result_name)
 
     with open(path, 'w') as file:
         json.dump(results, file)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
                          var.val_ques_path, var.val_ques_embedding_path,
                          var.val_ann_path, var.val_ans_idxs_path)
 
-    eval_loader = DataLoader(eval_set, batch_size=var.val_batch_size, shuffle=False, num_workers=var.num_workers)
+    eval_loader = DataLoader(eval_set, batch_size=128, shuffle=False, num_workers=16)
 
     model.to(var.device)
 
