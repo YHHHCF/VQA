@@ -38,7 +38,7 @@ class BaselineCNN(nn.Module):
 
 # copy the weights from pre_trained model to the new model
 def get_baseline():
-    pt_model = models.resnet152(pretrained=True)
+    pt_model = models.resnet50(pretrained=True)
 
     new_model = BaselineCNN(pt_model)
     params_pt = pt_model.state_dict()

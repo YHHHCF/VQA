@@ -3,8 +3,12 @@ from data_loader import *
 import baseline
 from tensorboardX import SummaryWriter
 
-
 def train(model, optimizer, criterion, train_loader, val_loader, writer):
+    model.train()
+
+    idx = 0
+    loss_total = 0  # average loss over 100 iterations
+
     for e in range(var.epoch):
         for bID, data in enumerate(train_loader):
             imgs = data['img'].to(var.device)
@@ -14,16 +18,25 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer):
             pred = model(imgs, ques)
             loss = criterion(pred, ans)
 
-            writer.add_scalar('train/loss', loss.item(), bID)
+            loss_total += loss.detach().clone().cpu().data.numpy()
+            idx += 1
+
+            if idx % 100 == 0:
+                writer.add_scalar('train/loss', loss_total / 100, idx)
+                print("Iteration {}: loss is {}".format(idx, round(loss_total / 100, 2)))
+                loss_total = 0
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
+        model.eval()
         val_loss, val_acc = val(model, criterion, val_loader)
-        print("Epoch {}: loss is {}, acc is {}".format(e, val_loss, val_acc))
-        writer.add_scalar('val/loss', val_loss.item(), bID)
-        writer.add_scalar('val/acc', val_acc.item(), bID)
+        model.train()
+
+        print("Epoch {}: loss is {}, acc is {}".format(e, round(val_loss, 2), round(val_acc, 2)))
+        writer.add_scalar('val/loss', val_loss, e)
+        writer.add_scalar('val/acc', val_acc, e)
 
         # save model
         dir = os.path.join(var.model_dir, var.experiment, str(e))
@@ -32,16 +45,15 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer):
             os.makedirs(dir)
 
         path = os.path.join(dir, var.model_name)
-        save_ckpt(model, optimizer, val_loss.item(), val_acc.item(), path)
+        save_ckpt(model, optimizer, val_loss, val_acc, path)
 
 
 def val(model, criterion, loader):
-    model.eval()
     with torch.no_grad():
         cnt = 0
         total_len = 0
         acc = 0.0
-        val_loss = 0.0
+        total_val_loss = 0.0
 
         for bID, data in enumerate(loader):
             imgs = data['img'].to(var.device)
@@ -49,28 +61,39 @@ def val(model, criterion, loader):
             ans = data['ans'].to(var.device)
 
             pred = model(imgs, ques)
+            val_loss = criterion(pred, ans)
 
-            val_loss += criterion(pred, ans)
+            pred = pred.detach().clone().cpu().data.numpy()
+            total_val_loss += val_loss.detach().clone().cpu().data.numpy()
+            ans = ans.clone().cpu().data.numpy()
 
             # use a different metric to calculate acc here (count whether the prediction meets the best answer)
-            pred_idx = torch.argmax(pred, 1)
-            acc += sum(pred_idx == ans)
+            pred_idx = np.argmax(pred, 1)
+            acc += np.sum(pred_idx == ans)
 
             cnt += 1
             total_len += len(ans)
 
         acc = float(acc) / total_len
-        val_loss /= cnt
+        total_val_loss /= cnt
 
-    model.train()
-
-    return val_loss, acc
+    return total_val_loss, acc * 100
 
 
 if __name__ == "__main__":
     model = baseline.BaselineModel()
-    optimizer = torch.optim.Adam(model.parameters(), lr=var.lr, weight_decay=var.wd)
+
+    params = list(model.parameters())
+
+    for param in params[:-6]:
+        param.requires_grad = False
+
+    optimizer = torch.optim.Adam(params[-6:], lr=var.lr, weight_decay=var.wd)
     criterion = nn.CrossEntropyLoss()
+
+    if var.if_pretrain:
+        path = var.ckpt_path
+        model, optimizer = load_ckpt(model, optimizer, path)
 
     # dataset for train/val VQA
     train_set = VqaDataset(var.train_img_path, var.train_img_name_pattern,

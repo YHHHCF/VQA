@@ -10,8 +10,9 @@ from PIL import Image
 import datetime
 import numpy as np
 
+
 # resize and normalize training image before feeding into CNN
-img_norm = trans.Compose([trans.Resize((256, 256)),
+img_norm = trans.Compose([trans.Resize((224, 224)),
                           trans.ToTensor(),
                           trans.Normalize(mean=[0.485, 0.456, 0.406],
                                           std=[0.229, 0.224, 0.225])])
@@ -150,6 +151,12 @@ def load_ckpt(model, optimizer, path):
 
     model.load_state_dict(ckpt['param'])
     optimizer.load_state_dict(ckpt['optim'])
+
+    for state in optimizer.state.values():
+        for k, v in state.items():
+            if isinstance(v, torch.Tensor):
+                state[k] = v.to(var.device)
+
     return model, optimizer
 
 
