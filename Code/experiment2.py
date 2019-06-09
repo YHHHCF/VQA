@@ -33,4 +33,5 @@ def run_experiment():
 
     writer = SummaryWriter()
 
-    train(imp_model, optimizer, criterion, train_loader, val_loader, writer, cf2.epoch)
+    with torch.autograd.set_detect_anomaly(True):
+      train(imp_model, optimizer, criterion, train_loader, val_loader, writer, cf2.epoch)

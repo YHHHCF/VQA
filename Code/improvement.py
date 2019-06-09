@@ -41,8 +41,8 @@ class ImprovedModel(nn.Module):
         v_out = torch.zeros_like(v).to(var.device)  # (B, 256, 56, 56)
 
         for i in range(v.size(0)):
-            v_batch = F.conv2d(v[i].unsqueeze(0), so_filter[i], padding=1, groups=256)
-            v_out[i] = v_batch.squeeze(0)
+            v_sub = F.conv2d(v[i:i+1], so_filter[i], padding=1, groups=256, requires_grad=False)  # (1, 256, 56, 56)
+            v_out[i] = torch.squeeze(F.conv2d(v_sub, so_filter[i], padding=1, groups=256), 0)  # (256, 56, 56)
 
         # a short cut
         v += self.so_bn(v_out)  # (B, 256, 56, 56)
