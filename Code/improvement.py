@@ -3,6 +3,8 @@ import torch
 import torchvision.models as models
 import variables as var
 import torch.nn.functional as F
+from data_loader import *
+import config.cf2 as cf2
 
 
 class ImprovedModel(nn.Module):

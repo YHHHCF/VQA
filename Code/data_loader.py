@@ -123,14 +123,16 @@ class VqaDataset(Dataset):
 # check whether the parameters of the model has changed
 def print_model(model):
     params = model.state_dict()
-    key_1 = list(params.keys())[:10]
-    key_2 = list(params.keys())[-10:]
+    key_1 = list(params.keys())[:20]
+    key_2 = list(params.keys())[-20:]
 
+    print("===============start===============")
     for key in key_1:
         print(key, torch.max(params[key]))
 
     for key in key_2:
         print(key, torch.max(params[key]))
+    print("==============end================")
 
 
 # save the parameters of the model
@@ -146,18 +148,33 @@ def save_ckpt(model, optimizer, loss, acc, path):
 
 # load the parameters from a ckpt to a model and optimizer
 def load_ckpt(model, optimizer, path):
-    ckpt = torch.load(path)
+    if not torch.cuda.is_available():  # run on cpu
+        ckpt = torch.load(path, map_location='cpu')
+    else:  # run on gpu
+        ckpt = torch.load(path)
+
     print("Pre-trained loss is {}, accuracy is {}".format(ckpt['loss'], ckpt['acc']))
 
-    model.load_state_dict(ckpt['param'])
-    optimizer.load_state_dict(ckpt['optim'])
+    print("Before loading")
+    print_model(model)
+    model.load_state_dict(ckpt['param'], strict=False)
+    print("After loading")
+    print_model(model)
 
-    for state in optimizer.state.values():
-        for k, v in state.items():
-            if isinstance(v, torch.Tensor):
-                state[k] = v.to(var.device)
+    # if do not want to load optimizer, set it None
+    if not optimizer:
+        return model
 
-    return model, optimizer
+    # if want to load pre-trained optimizer, pass it in
+    else:
+        optimizer.load_state_dict(ckpt['optim'])
+
+        for state in optimizer.state.values():
+            for k, v in state.items():
+                if isinstance(v, torch.Tensor):
+                    state[k] = v.to(var.device)
+
+        return model, optimizer
 
 
 def load_file(path):
