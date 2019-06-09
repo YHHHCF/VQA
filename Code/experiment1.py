@@ -1,5 +1,6 @@
 from train_val import *
 from config import cf1
+import baseline
 
 
 # train the baseline model
@@ -32,7 +33,7 @@ def run_experiment():
                                   num_workers=cf1.num_workers)
     val_loader = DataLoader(val_set, batch_size=cf1.val_batch_size, shuffle=False, num_workers=cf1.num_workers)
 
-    model.to(var.device)
+    model = model.to(var.device)
 
     writer = SummaryWriter()
 

@@ -1,7 +1,6 @@
 import torch.nn as nn
 from data_loader import *
 import argparse
-import baseline
 from tensorboardX import SummaryWriter
 
 
@@ -100,7 +99,7 @@ class experiment_runner():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Load VQA.')
+    parser = argparse.ArgumentParser()
     parser.add_argument('-e', type=int, default=1)
 
     args = parser.parse_args()
