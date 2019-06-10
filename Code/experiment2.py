@@ -23,6 +23,11 @@ def run_experiment():
     if cf2.if_pretrain:
         path = cf2.ckpt_path
         imp_model, optimizer = load_ckpt(model=imp_model, optimizer=optimizer, path=path)
+
+        # change learning rate of the optimizer
+        for g in optimizer.param_groups:
+            g['lr'] = cf2.lr
+
     else:
         path = cf2.ckpt_path
         imp_model = load_ckpt(model=imp_model, optimizer=None, path=path)

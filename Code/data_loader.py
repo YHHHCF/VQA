@@ -173,7 +173,6 @@ def load_ckpt(model, optimizer, path):
             for k, v in state.items():
                 if isinstance(v, torch.Tensor):
                     state[k] = v.to(var.device)
-
         return model, optimizer
 
 
