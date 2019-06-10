@@ -22,6 +22,9 @@ def run_experiment():
 
     if cf2.if_pretrain:
         path = cf2.ckpt_path
+        imp_model, optimizer = load_ckpt(model=imp_model, optimizer=optimizer, path=path)
+    else:
+        path = cf2.ckpt_path
         imp_model = load_ckpt(model=imp_model, optimizer=None, path=path)
 
     # dataset for train/val VQA

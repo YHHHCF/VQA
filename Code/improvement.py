@@ -46,7 +46,7 @@ class ImprovedModel(nn.Module):
             for j in range(3):
                 v_so = v_so + torch.mul(v_pad[:, :, i:i+56, j:j+56], so_filter[:, :, i:i+1, j:j+1])
 
-        # # a short cut
+        # a short cut
         v = v + self.so_bn(v_so)  # (B, 256, 56, 56)
         v = self.img_encoder_2(v)  # (B, 2048, 1, 1)
         v = v.reshape(v.shape[0], v.shape[1])  # (B, 2048)

@@ -28,6 +28,15 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, 
                 print("Iteration {}: loss is {}".format(idx, round(loss_total / 100, 2)))
                 loss_total = 0
 
+                # show the change of parameters for experiment 2
+                if experiment == 2:
+                    params = list(model.parameters())
+                    params = params[-6:-2]
+                    writer.add_histogram("params/filter_w", params[0].clone().cpu().data.numpy(), idx)
+                    writer.add_histogram("params/filter_b", params[1].clone().cpu().data.numpy(), idx)
+                    writer.add_histogram("params/bn_gamma", params[2].clone().cpu().data.numpy(), idx)
+                    writer.add_histogram("params/bn_beta", params[3].clone().cpu().data.numpy(), idx)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
