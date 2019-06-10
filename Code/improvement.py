@@ -11,6 +11,7 @@ class ImprovedModel(nn.Module):
     def __init__(self):
         super(ImprovedModel, self).__init__()
         self.img_encoder_1, self.img_encoder_2 = get_baseline()  # a cnn to encode image to a 2048 dim vector
+        self.pad = nn.ZeroPad2d(1)
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_encoder = nn.Linear(var.top_vocab_num + 1, 2048)  # an fc to encode question to a 2048 dim vector
@@ -28,21 +29,22 @@ class ImprovedModel(nn.Module):
 
     def forward(self, v, q):  # v is input image, q is input question from data_loader
         q = self.ques_encoder(q)  # (B, 2048)
-        so_filter = self.so_filter(q)  # (B, (512*3*3))
+        so_filter = self.so_filter(q)  # (B, (256*3*3))
 
         # get filter parameters
-        so_filter = so_filter.reshape((-1, 256, 1, 3, 3))  # (B, 256, 1, 3, 3)
+        so_filter = so_filter.reshape((-1, 256, 3, 3))  # (B, 256, 3, 3)
         q = self.activation(q)  # (B, 2048)
         q = self.ques_linear(q)  # (B, top_ans_num + 1)
 
         v = self.img_encoder_1(v)  # (B, 256, 56, 56)
+        v_pad = self.pad(v)  # (B, 256, 58, 58)
 
         # go throught each so_filter batch by batch
         v_out = torch.zeros_like(v).to(var.device)  # (B, 256, 56, 56)
 
-        for i in range(v.size(0)):
-            v_sub = F.conv2d(v[i:i+1], so_filter[i], padding=1, groups=256, requires_grad=False)  # (1, 256, 56, 56)
-            v_out[i] = torch.squeeze(F.conv2d(v_sub, so_filter[i], padding=1, groups=256), 0)  # (256, 56, 56)
+        for i in range(3):
+            for j in range(3):
+                v_out += torch.mul(v_pad[:, :, i:i+56, j:j+56], so_filter[:, :, i:i+1, j:j+1])
 
         # a short cut
         v += self.so_bn(v_out)  # (B, 256, 56, 56)
