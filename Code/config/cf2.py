@@ -8,7 +8,7 @@ epoch = 30
 train_batch_size = 128
 val_batch_size = 128
 num_workers = 16
-lr = 3e-5
+lr = 1e-6
 wd = 1e-5
 
 if_pretrain = True

@@ -24,7 +24,7 @@ class ImprovedModel(nn.Module):
         self.so_bn.weight.data.zero_()
         self.so_bn.bias.data.zero_()
 
-        self.activation = nn.ReLU(inplace=True)
+        self.activation = nn.ReLU(inplace=False)
         self.ques_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
     def forward(self, v, q):  # v is input image, q is input question from data_loader
@@ -40,14 +40,14 @@ class ImprovedModel(nn.Module):
         v_pad = self.pad(v)  # (B, 256, 58, 58)
 
         # go throught each so_filter batch by batch
-        v_out = torch.zeros_like(v).to(var.device)  # (B, 256, 56, 56)
+        v_so = torch.zeros_like(v).to(var.device)  # (B, 256, 56, 56)
 
         for i in range(3):
             for j in range(3):
-                v_out += torch.mul(v_pad[:, :, i:i+56, j:j+56], so_filter[:, :, i:i+1, j:j+1])
+                v_so = v_so + torch.mul(v_pad[:, :, i:i+56, j:j+56], so_filter[:, :, i:i+1, j:j+1])
 
-        # a short cut
-        v += self.so_bn(v_out)  # (B, 256, 56, 56)
+        # # a short cut
+        v = v + self.so_bn(v_so)  # (B, 256, 56, 56)
         v = self.img_encoder_2(v)  # (B, 2048, 1, 1)
         v = v.reshape(v.shape[0], v.shape[1])  # (B, 2048)
         v = self.img_linear(v)  # (B, top_ans_num + 1)
