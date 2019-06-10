@@ -8,7 +8,16 @@ import improvement
 def run_experiment():
     imp_model = improvement.ImprovedModel()
 
-    optimizer = torch.optim.Adam(imp_model.parameters(), lr=cf2.lr, weight_decay=cf2.wd)
+    # params[-6:-2] are so_filter params and bn params
+    params = list(imp_model.parameters())
+
+    for param in params[:-6]:
+        param.requires_grad = False
+
+    for param in params[-2:]:
+        param.requires_grad = False
+
+    optimizer = torch.optim.Adam(params[-6:-2], lr=cf2.lr, weight_decay=cf2.wd)
     criterion = nn.CrossEntropyLoss()
 
     if cf2.if_pretrain:
@@ -33,4 +42,4 @@ def run_experiment():
 
     writer = SummaryWriter()
 
-    train(imp_model, optimizer, criterion, train_loader, val_loader, writer, cf2.epoch)
+    train(imp_model, optimizer, criterion, train_loader, val_loader, writer, cf2.epoch, experiment=2)

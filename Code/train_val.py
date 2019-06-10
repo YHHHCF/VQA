@@ -4,8 +4,8 @@ import argparse
 from tensorboardX import SummaryWriter
 
 
-def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch):
-    global experiment
+def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, experiment):
+    print("perform experiment:", experiment)
     model.train()
 
     idx = 0
@@ -19,8 +19,6 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch):
 
             pred = model(imgs, ques)
             loss = criterion(pred, ans)
-
-            print("debug loss:", loss.item())
 
             loss_total += loss.detach().clone().cpu().data.numpy()
             idx += 1

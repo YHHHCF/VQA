@@ -123,8 +123,8 @@ class VqaDataset(Dataset):
 # check whether the parameters of the model has changed
 def print_model(model):
     params = model.state_dict()
-    key_1 = list(params.keys())[:20]
-    key_2 = list(params.keys())[-20:]
+    key_1 = list(params.keys())[:10]
+    key_2 = list(params.keys())[-10:]
 
     print("===============start===============")
     for key in key_1:

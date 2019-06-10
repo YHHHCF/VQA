@@ -37,4 +37,4 @@ def run_experiment():
 
     writer = SummaryWriter()
 
-    train(model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch)
+    train(model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=1)
