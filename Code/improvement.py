@@ -17,10 +17,10 @@ class ImprovedModel(nn.Module):
         self.ques_encoder = nn.Linear(var.top_vocab_num + 1, 2048)  # an fc to encode question to a 2048 dim vector
 
         # the second order conv filter learned from question embedding
-        self.so_filter = nn.Linear(2048, 256 * 3 * 3)
+        self.so_filter = nn.Linear(2048, cf2.ch * cf2.k_size * cf2.k_size)
 
         # init the second order output as 0(skip it at first)
-        self.so_bn = nn.BatchNorm2d(num_features=256)
+        self.so_bn = nn.BatchNorm2d(num_features=cf2.ch)
         self.so_bn.weight.data.zero_()
         self.so_bn.bias.data.zero_()
 
@@ -29,25 +29,25 @@ class ImprovedModel(nn.Module):
 
     def forward(self, v, q):  # v is input image, q is input question from data_loader
         q = self.ques_encoder(q)  # (B, 2048)
-        so_filter = self.so_filter(q)  # (B, (256*3*3))
+        so_filter = self.so_filter(q)  # (B, (ch*k*k))
 
         # get filter parameters
-        so_filter = so_filter.reshape((-1, 256, 3, 3))  # (B, 256, 3, 3)
+        so_filter = so_filter.reshape((-1, cf2.ch, cf2.k_size, cf2.k_size))  # (B, ch, k, k)
         q = self.activation(q)  # (B, 2048)
         q = self.ques_linear(q)  # (B, top_ans_num + 1)
 
-        v = self.img_encoder_1(v)  # (B, 256, 56, 56)
-        v_pad = self.pad(v)  # (B, 256, 58, 58)
+        v = self.img_encoder_1(v)  # (B, ch, o, o)
+        v_pad = self.pad(v)  # (B, ch, o+2, o+2)
 
         # go throught each so_filter batch by batch
-        v_so = torch.zeros_like(v).to(var.device)  # (B, 256, 56, 56)
+        v_so = torch.zeros_like(v).to(var.device)  # (B, ch, o, o)
 
-        for i in range(3):
-            for j in range(3):
-                v_so = v_so + torch.mul(v_pad[:, :, i:i+56, j:j+56], so_filter[:, :, i:i+1, j:j+1])
+        for i in range(cf2.k_size):
+            for j in range(cf2.k_size):
+                v_so = v_so + torch.mul(v_pad[:, :, i:i+cf2.o_size, j:j+cf2.o_size], so_filter[:, :, i:i+1, j:j+1])
 
         # a short cut
-        v = v + self.so_bn(v_so)  # (B, 256, 56, 56)
+        v = v + self.so_bn(v_so)  # (B, ch, o, o)
         v = self.img_encoder_2(v)  # (B, 2048, 1, 1)
         v = v.reshape(v.shape[0], v.shape[1])  # (B, 2048)
         v = self.img_linear(v)  # (B, top_ans_num + 1)
@@ -86,9 +86,7 @@ def get_baseline():
 
     new_model.load_state_dict(params_new)
 
-    # the place to cut res block
-    # 5 is the end of conv2_x; 6 is the end of conv3_x
-    cut = 5
+    cut = cf2.cut
 
     new_model_1 = new_model.layers[:cut]  # split from the end of conv3_x
     new_model_2 = new_model.layers[cut:]
