@@ -24,6 +24,34 @@ class BaselineModel(nn.Module):
         return v + q
 
 
+# a model with only image encoding
+class BaselineModelV(nn.Module):
+    def __init__(self):
+        super(BaselineModelV, self).__init__()
+        self.img_encoder = get_baseline()  # a cnn to encode image to a 2048 dim vector
+        self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
+
+    def forward(self, v):  # v is input image
+        v = self.img_encoder(v)
+        v = self.img_linear(v)
+        return v
+
+
+# a model with only question encoding
+class BaselineModelQ(nn.Module):
+    def __init__(self):
+        super(BaselineModelQ, self).__init__()
+        self.ques_encoder = nn.Linear(var.top_vocab_num + 1, 2048)  # an fc to encode question to a 2048 dim vector
+        self.activation = nn.ReLU(inplace=True)
+        self.ques_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
+
+    def forward(self, q):  # q is input question from data_loader
+        q = self.ques_encoder(q)
+        q = self.activation(q)
+        q = self.ques_linear(q)
+        return q
+
+
 class BaselineCNN(nn.Module):
     def __init__(self, model):
         super(BaselineCNN, self).__init__()

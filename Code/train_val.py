@@ -17,7 +17,15 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, 
             ques = data['ques'].to(var.device)
             ans = data['ans'].to(var.device)
 
-            pred = model(imgs, ques)
+            if experiment == 11:
+                pred = model(imgs)
+
+            elif experiment == 12:
+                pred = model(ques)
+                
+            else:
+                pred = model(imgs, ques)
+
             loss = criterion(pred, ans)
 
             loss_total += loss.detach().clone().cpu().data.numpy()
@@ -42,7 +50,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, 
             optimizer.step()
 
         model.eval()
-        val_loss, val_acc = val(model, criterion, val_loader)
+        val_loss, val_acc = val(model, criterion, val_loader, experiment)
         model.train()
 
         print("Epoch {}: loss is {}, acc is {}".format(e, round(val_loss, 2), round(val_acc, 2)))
@@ -59,7 +67,8 @@ def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, 
         save_ckpt(model, optimizer, val_loss, val_acc, path)
 
 
-def val(model, criterion, loader):
+def val(model, criterion, loader, experiment):
+    model.eval()
     with torch.no_grad():
         cnt = 0
         total_len = 0
@@ -71,7 +80,15 @@ def val(model, criterion, loader):
             ques = data['ques'].to(var.device)
             ans = data['ans'].to(var.device)
 
-            pred = model(imgs, ques)
+            if experiment == 11:
+                pred = model(imgs)
+
+            elif experiment == 12:
+                pred = model(ques)
+
+            else:
+                pred = model(imgs, ques)
+
             val_loss = criterion(pred, ans)
 
             pred = pred.detach().clone().cpu().data.numpy()

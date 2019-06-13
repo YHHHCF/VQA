@@ -41,13 +41,12 @@ def run_experiment():
 
 
 def run_experiment_1():
-    model = baseline.BaselineModel()
+    v_model = baseline.BaselineModelV()
 
     if cf1.if_pretrain:
         path = cf1.ckpt_path
-        model = load_ckpt(model, None, path)
+        v_model = load_ckpt(v_model, None, path)
 
-    v_model = nn.Sequential(*list(model.children())[:-3])
     params = list(v_model.parameters())
 
     for param in params[:-2]:
@@ -70,20 +69,24 @@ def run_experiment_1():
                               num_workers=cf1.num_workers)
     val_loader = DataLoader(val_set, batch_size=cf1.val_batch_size, shuffle=False, num_workers=cf1.num_workers)
 
-    model = model.to(var.device)
+    v_model = v_model.to(var.device)
 
-    writer = SummaryWriter()
+    print(v_model)
 
-    train(model, optimizer, criterion, val_loader, val_loader, writer, cf1.epoch, experiment=11)
+    if cf1.if_pretrain:
+      val_loss, val_acc = val(v_model, criterion, val_loader, experiment=11)
+      print("Experiment 1.1: val loss is {}. val acc is {}".format(val_loss, val_acc))
+    else:
+      writer = SummaryWriter()
+      train(v_model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=11)
 
 
 def run_experiment_2():
-    model = baseline.BaselineModel()
+    q_model = baseline.BaselineModelQ()
     if cf1.if_pretrain:
         path = cf1.ckpt_path
-        model = load_ckpt(model, None, path)
+        q_model = load_ckpt(q_model, None, path)
 
-    q_model = nn.Sequential(*list(model.children())[:-4], *list(model.children())[-3:])
     params = list(q_model.parameters())
 
     for param in params[:-4]:
@@ -106,8 +109,13 @@ def run_experiment_2():
                               num_workers=cf1.num_workers)
     val_loader = DataLoader(val_set, batch_size=cf1.val_batch_size, shuffle=False, num_workers=cf1.num_workers)
 
-    model = model.to(var.device)
+    q_model = q_model.to(var.device)
 
-    writer = SummaryWriter()
+    print(q_model)
 
-    train(model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=12)
+    if cf1.if_pretrain:
+      val_loss, val_acc = val(q_model, criterion, val_loader, experiment=12)
+      print("Experiment 1.2: val loss is {}. val acc is {}".format(val_loss, val_acc))
+    else:
+      writer = SummaryWriter()
+      train(q_model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=12)
