@@ -9,7 +9,7 @@ num_workers = 8
 lr = 3e-5
 wd = 1e-5
 
-if_pretrain = False
+if_pretrain = True
 pt_exp_id = 1
 pt_epoch = 0
 

@@ -99,12 +99,21 @@ class experiment_runner():
         if self.exp_id == 1:
             from experiment1 import run_experiment
             run_experiment()
+
+        elif self.exp_id == 11:
+            from experiment1 import run_experiment_1
+            run_experiment_1()
+
+        elif self.exp_id == 12:
+            from experiment1 import run_experiment_2
+            run_experiment_2()
+
         elif self.exp_id == 2:
             from experiment2 import run_experiment
+            run_experiment()
+
         else:
             raise NotImplemented
-
-        run_experiment()
 
 
 if __name__ == "__main__":
