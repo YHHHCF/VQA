@@ -83,9 +83,9 @@ def run_experiment_1():
 
 def run_experiment_2():
     q_model = baseline.BaselineModelQ()
-    if cf1.if_pretrain:
-        path = cf1.ckpt_path
-        q_model = load_ckpt(q_model, None, path)
+    
+    # path = cf1.ckpt_path
+    # q_model = load_ckpt(q_model, None, path)
 
     params = list(q_model.parameters())
 
@@ -113,9 +113,9 @@ def run_experiment_2():
 
     print(q_model)
 
-    if cf1.if_pretrain:
-      val_loss, val_acc = val(q_model, criterion, val_loader, experiment=12)
-      print("Experiment 1.2: val loss is {}. val acc is {}".format(val_loss, val_acc))
-    else:
-      writer = SummaryWriter()
-      train(q_model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=12)
+    # if cf1.if_pretrain:
+    #   val_loss, val_acc = val(q_model, criterion, val_loader, experiment=12)
+    #   print("Experiment 1.2: val loss is {}. val acc is {}".format(val_loss, val_acc))
+    # else:
+    writer = SummaryWriter()
+    train(q_model, optimizer, criterion, train_loader, val_loader, writer, cf1.epoch, experiment=12)
