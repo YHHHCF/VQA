@@ -95,7 +95,7 @@ class VqaDataset(Dataset):
         item['img'] = torch.load(os.path.join(self.img_dir, 'pre_process', str(img_id) + '.pt'))
 
         # get questions
-        ques = self.ques_embedding[q_id]
+        ques = self.ques_embedding[q_id]  # (L,)
         vec_ques = torch.zeros(var.top_vocab_num + 1)
         vec_ques[ques] = 1  # multi-hot BOW embedding of the question
         item['ques'] = vec_ques
