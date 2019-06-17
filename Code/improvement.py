@@ -5,6 +5,7 @@ import variables as var
 import torch.nn.functional as F
 from data_loader import *
 import config.cf2 as cf2
+import config.cf4 as cf4
 
 
 class ImprovedModel(nn.Module):
@@ -88,6 +89,6 @@ def get_baseline():
 
     cut = cf2.cut
 
-    new_model_1 = new_model.layers[:cut]  # split from the end of conv3_x
+    new_model_1 = new_model.layers[:cut]  # split from the end of convk_x
     new_model_2 = new_model.layers[cut:]
     return new_model_1, new_model_2

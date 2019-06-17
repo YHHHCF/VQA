@@ -22,7 +22,6 @@ img_norm = trans.Compose([trans.Resize((224, 224)),
 def get_im(path):
     img = Image.open(path).convert("RGB")
     img = img_norm(img)
-    # img = torch.tensor(img, dtype=torch.float16)
     return img
 
 
@@ -95,10 +94,10 @@ class VqaDataset(Dataset):
         item['img'] = torch.load(os.path.join(self.img_dir, 'pre_process', str(img_id) + '.pt'))
 
         # get questions
-        ques = self.ques_embedding[q_id]  # (L,)
-        vec_ques = torch.zeros(var.top_vocab_num + 1)
-        vec_ques[ques] = 1  # multi-hot BOW embedding of the question
-        item['ques'] = vec_ques
+        ques = self.ques_embedding[q_id]  # (L,) each element in [0, top_num + 1]
+        ques = torch.tensor(ques).reshape(1, -1)
+        ques_one_hot = torch.zeros(var.top_vocab_num + 2, ques.shape[1]).scatter_(0, ques, 1)
+        item['ques'] = ques_one_hot
 
         # get answers
         ans = self.ans_idxs[q_id]
@@ -196,7 +195,7 @@ def load_dict(path):
 if __name__ == "__main__":
     img_dir = var.val_img_path
     ques_path = var.val_ques_path
-    ques_embbed_path = var.val_ques_embedding_path
+    ques_embbed_path = var.val_ques_idx_path
     ann_path = var.val_ann_path
     ans_idxs_path = var.val_ans_idxs_path
     img_name_pattern = var.val_img_name_pattern
@@ -211,5 +210,7 @@ if __name__ == "__main__":
     for batch_id, batch_data in enumerate(loader):
         print(batch_id)
         print(batch_data['img'].shape)
+        print(batch_data['ques'].shape)
+        print(batch_data['ans'].shape)
 
     print('DONE (t=%0.2fs)' % ((datetime.datetime.utcnow() - time_t).total_seconds()))

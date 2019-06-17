@@ -129,6 +129,14 @@ class experiment_runner():
             from experiment2 import run_experiment
             run_experiment()
 
+        elif self.exp_id == 3:
+            from experiment3 import run_experiment
+            run_experiment()
+
+        elif self.exp_id == 4:
+            from experiment4 import run_experiment
+            run_experiment()
+
         else:
             raise NotImplemented
 
