@@ -56,6 +56,33 @@ def encode_question(vqa, vocabulary, save_path, top_num):
     return
 
 
+# encode all questions to idx arrays with each word converted to an idx in vocabulary
+def idx_question(vqa, vocabulary, save_path, top_num):
+    qqa = vqa.qqa
+    ques_all = []
+    q_ids = qqa.keys()
+
+    for key in q_ids:
+        ques_all.append(qqa[key]['question'])
+
+    # get top_num words in questions and encode them to vectors with top_num elements
+    vectorizer = CountVectorizer(max_features=top_num, vocabulary=vocabulary)
+    ques_BoW = vectorizer.fit_transform(ques_all).toarray()
+
+    # save question as dictionary: key is question_id, value is encoded question
+    ques_dict = {}
+    q_ids = list(q_ids)
+    for i in range(len(q_ids)):
+        q_id = q_ids[i]
+        bow = ques_BoW[i]
+        ques_dict[q_id] = np.nonzero(bow)[0]  # get the indices of words(bag of words)
+
+    np.savez(save_path, ques_dict)
+    print("saved idxed questions with length: ", len(ques_dict))
+    print("saving path is: ", save_path)
+    return
+
+
 if __name__ == "__main__":
     train_vqa = VQA(var.train_ann_path, var.train_ques_path)
     val_vqa = VQA(var.val_ann_path, var.val_ques_path)
@@ -65,8 +92,14 @@ if __name__ == "__main__":
     # get the vocabulary from train and val questions
     vocab = get_top_vocab(var.ques_vocab_path, train_vqa, val_vqa, top_num=var.top_vocab_num)
 
-    # question embedding for train/val/test/test_dev set
-    encode_question(train_vqa, vocab, var.train_ques_embedding_path, top_num=var.top_vocab_num)
-    encode_question(val_vqa, vocab, var.val_ques_embedding_path, top_num=var.top_vocab_num)
-    encode_question(test_dev_vqa, vocab, var.test_dev_ques_embedding_path, top_num=var.top_vocab_num)
-    encode_question(test_std_vqa, vocab, var.test_std_ques_embedding_path, top_num=var.top_vocab_num)
+    # # question embedding for train/val/test/test_dev set
+    # encode_question(train_vqa, vocab, var.train_ques_embedding_path, top_num=var.top_vocab_num)
+    # encode_question(val_vqa, vocab, var.val_ques_embedding_path, top_num=var.top_vocab_num)
+    # encode_question(test_dev_vqa, vocab, var.test_dev_ques_embedding_path, top_num=var.top_vocab_num)
+    # encode_question(test_std_vqa, vocab, var.test_std_ques_embedding_path, top_num=var.top_vocab_num)
+
+    # question idx for train/val/test/test_dev set
+    idx_question(train_vqa, vocab, var.train_ques_embedding_path, top_num=var.top_vocab_num)
+    idx_question(val_vqa, vocab, var.val_ques_embedding_path, top_num=var.top_vocab_num)
+    idx_question(test_dev_vqa, vocab, var.test_dev_ques_embedding_path, top_num=var.top_vocab_num)
+    idx_question(test_std_vqa, vocab, var.test_std_ques_embedding_path, top_num=var.top_vocab_num)

@@ -26,6 +26,11 @@ val_ques_embedding_path = os.path.join(data_path, 'Questions', 'val_ques_embeddi
 test_dev_ques_embedding_path = os.path.join(data_path, 'Questions', 'test_dev_ques_embedding.npz')
 test_std_ques_embedding_path = os.path.join(data_path, 'Questions', 'test_std_ques_embedding.npz')
 
+train_ques_idx_path = os.path.join(data_path, 'Questions', 'train_ques_idx.npz')
+val_ques_idx_path = os.path.join(data_path, 'Questions', 'val_ques_idx.npz')
+test_dev_ques_idx_path = os.path.join(data_path, 'Questions', 'test_dev_ques_idx.npz')
+test_std_ques_idx_path = os.path.join(data_path, 'Questions', 'test_std_ques_idx.npz')
+
 # paths for answer indices
 train_ans_idxs_path = os.path.join(data_path, 'Annotations', 'train_ans_idxs.npz')
 val_ans_idxs_path = os.path.join(data_path, 'Annotations', 'val_ans_idxs.npz')
