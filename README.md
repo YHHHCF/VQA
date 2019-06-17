@@ -13,6 +13,8 @@
 #### set configuration in Code/config/
 #### run baseline experiment: python train_val.py -e 1
 #### run improvement: python train_val.py -e 2
+#### run one-hot question embedding baseline: python train_val.py -e 3
+#### run one-hot question embedding baseline improvement: python train_val.py -e 4
 ####    
 
 ## To show result on tensorBoard
