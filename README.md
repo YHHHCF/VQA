@@ -4,7 +4,8 @@
 
 ## To perform preprocessing, go to Code/
 #### python img_preprocess.py
-#### python ques_preprocess.py
+#### python ques_preprocess.py  (bag of words encoding)
+#### python ques_preprocess_idx.py  (index encoding)
 #### python ans_preprocess.py
 ####    
 
