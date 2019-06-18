@@ -9,10 +9,10 @@ def run_experiment():
 
     params = list(model.parameters())
 
-    for param in params[:-6]:
+    for param in params[:-10]:
         param.requires_grad = False
 
-    optimizer = torch.optim.Adam(params[-6:], lr=cf4.lr, weight_decay=cf4.wd)
+    optimizer = torch.optim.Adam(params[-10:], lr=cf4.lr, weight_decay=cf4.wd)
     criterion = nn.CrossEntropyLoss()
 
     if cf4.if_pretrain:

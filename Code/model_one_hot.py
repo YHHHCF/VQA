@@ -1,11 +1,15 @@
-from improvement import *
+import baseline as bl
+import improvement as ip
 import torch
+import torch.nn as nn
+import variables as var
+from config import cf4
 
 
 class BaselineModel(nn.Module):
     def __init__(self):
         super(BaselineModel, self).__init__()
-        self.img_encoder = get_baseline()  # a cnn to encode image to a 2048 dim vector
+        self.img_encoder = bl.get_baseline()  # a cnn to encode image to a 2048 dim vector
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
@@ -25,7 +29,7 @@ class BaselineModel(nn.Module):
 class ImprovedModel(nn.Module):
     def __init__(self):
         super(ImprovedModel, self).__init__()
-        self.img_encoder_1, self.img_encoder_2 = get_baseline()  # a cnn to encode image to a 2048 dim vector
+        self.img_encoder_1, self.img_encoder_2 = ip.get_baseline()  # a cnn to encode image to a 2048 dim vector
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
