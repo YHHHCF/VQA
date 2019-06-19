@@ -33,9 +33,10 @@ class ImprovedModel(nn.Module):
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
+        self.ques_pad = nn.ZeroPad2d((1, 1))  # pad on L dimension
 
         # the second order question filter learned from CNN output
-        self.so_filter = nn.Linear(cf4.ch * cf4.o_size * cf4.o_size, 256)
+        self.so_filter = nn.Linear(cf4.ch * cf4.o_size * cf4.o_size, 256 * 3)  # 3 is kernel size
         self.drop_out = nn.Dropout(p=cf4.dp_rate)
 
         # init the second order output as 0(skip it at first)
@@ -55,13 +56,18 @@ class ImprovedModel(nn.Module):
 
         # so question filter
         v_1 = v_1.reshape(v_1.shape[0], -1)  # (B, ch * o * o)
-        so_filter = self.so_filter(v_1)  # (B, D=256)
+        so_filter = self.so_filter(v_1)  # (B, D=256 * k_size=3)
         so_filter = self.drop_out(so_filter)
-        so_filter = so_filter.reshape(so_filter.shape[0], so_filter.shape[1], 1)  # (B, D=256, 1)
+        so_filter = so_filter.reshape(so_filter.shape[0], so_filter.shape[1], 3)  # (B, D=256, k_size=3)
 
         # question encoding
         q = self.ques_conv(q)  # (B, D=256, L=14)  go through first conv
-        q_so = so_filter * q  # (B, D=256, L=14)
+        q_pad = self.ques_pad(q)  #  (B, D=256, L=16)
+
+        # (B, D=256, L=14)
+        q_so = so_filter[:,:,0:1] * q_pad[:,:,:-2]
+        q_so = q_so + so_filter[:,:,1:2] * q_pad[:,:,1:-1]
+        q_so = q_so + so_filter[:,:,2:3] * q_pad[:,:,2:]
 
         q = q + self.so_bn(q_so)  # (B, D=256, L=14)
         q = torch.sum(q, 2)  # (B, D=256)
