@@ -36,7 +36,7 @@ class ImprovedModel(nn.Module):
 
         # the second order question filter learned from CNN output
         self.so_filter = nn.Linear(cf4.ch * cf4.o_size * cf4.o_size, 256)
-        self.drop_out = nn.Dropout(p=0.5)
+        self.drop_out = nn.Dropout(p=cf4.dp_rate)
 
         # init the second order output as 0(skip it at first)
         self.so_bn = nn.BatchNorm1d(num_features=256)
