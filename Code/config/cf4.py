@@ -7,8 +7,8 @@ train_batch_size = 128
 val_batch_size = 128
 num_workers = 8
 lr = 3e-5
-wd = 1e-5
-dp_rate = 0.75  # drop out rate of second order filter learning
+wd = 1e-2
+dp_rate = 0.9  # drop out rate of second order filter learning
 
 if_pretrain = False
 pt_exp_id = 1

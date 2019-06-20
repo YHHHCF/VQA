@@ -58,7 +58,7 @@ class ImprovedModel(nn.Module):
         v_1 = v_1.reshape(v_1.shape[0], -1)  # (B, ch * o * o)
         so_filter = self.so_filter(v_1)  # (B, D=256 * k_size=3)
         so_filter = self.drop_out(so_filter)
-        so_filter = so_filter.reshape(so_filter.shape[0], so_filter.shape[1], 3)  # (B, D=256, k_size=3)
+        so_filter = so_filter.reshape(so_filter.shape[0], -1, 3)  # (B, D=256, k_size=3)
 
         # question encoding
         q = self.ques_conv(q)  # (B, D=256, L=14)  go through first conv
