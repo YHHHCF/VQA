@@ -69,7 +69,7 @@ class BaselineCNN(nn.Module):
 
 
 # copy the weights from pre_trained model to the new model
-def get_baseline():
+def get_baseline(cut):
     pt_model = models.resnet50(pretrained=True)
 
     new_model = BaselineCNN(pt_model)
@@ -86,8 +86,6 @@ def get_baseline():
         idx += 1
 
     new_model.load_state_dict(params_new)
-
-    cut = cf2.cut
 
     new_model_1 = new_model.layers[:cut]  # split from the end of convk_x
     new_model_2 = new_model.layers[cut:]

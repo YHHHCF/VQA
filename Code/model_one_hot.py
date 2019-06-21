@@ -13,6 +13,15 @@ class BaselineModel(nn.Module):
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
+        self.ques_pad = nn.ZeroPad2d((1, 1))  # pad on L dimension
+
+        self.ques_filter = nn.Conv1d(256, 256, 3, 1, 1)  # convert Q to 256-dim vector
+
+        # init the second order output as 0(skip it at first)
+        self.filter_bn = nn.BatchNorm1d(num_features=256)
+        self.filter_bn.weight.data.zero_()
+        self.filter_bn.bias.data.zero_()
+
         self.ques_linear = nn.Linear(256, var.top_ans_num + 1)  # classification layer
 
     def forward(self, v, q):  # v is input image, q is input question from data_loader
@@ -20,6 +29,9 @@ class BaselineModel(nn.Module):
         v = self.img_linear(v)  # (B, var.top_ans_num + 1)
 
         q = self.ques_conv(q)  # (B, D=256, L=14)
+        q_f = self.ques_filter(q)
+        q = q + self.filter_bn(q_f)
+
         q = torch.sum(q, 2)  # (B, D=256)
         q = self.ques_linear(q)  # (B, var.top_ans_num + 1)
 
@@ -29,7 +41,7 @@ class BaselineModel(nn.Module):
 class ImprovedModel(nn.Module):
     def __init__(self):
         super(ImprovedModel, self).__init__()
-        self.img_encoder_1, self.img_encoder_2 = ip.get_baseline()  # a cnn to encode image to a 2048 dim vector
+        self.img_encoder_1, self.img_encoder_2 = ip.get_baseline(cf4.cut)  # a cnn to encode image to a 2048 dim vector
         self.img_linear = nn.Linear(2048, var.top_ans_num + 1)  # classification layer
 
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
