@@ -4,14 +4,14 @@ import argparse
 from tensorboardX import SummaryWriter
 
 
-def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, experiment):
+def train(model, optimizer, criterion, train_loader, val_loader, writer, epoch, start_ep, experiment):
     print("perform experiment:", experiment)
     model.train()
 
     idx = 0
     loss_total = 0  # average loss over 100 iterations
 
-    for e in range(epoch):
+    for e in range(start_ep, start_ep + epoch):
         for bID, data in enumerate(train_loader):
             imgs = data['img'].to(var.device)
             ques = data['ques'].to(var.device)

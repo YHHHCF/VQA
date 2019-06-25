@@ -14,7 +14,6 @@ __version__ = '0.9'
 #  showQA     - Display the specified questions and answers.
 #  loadRes    - Load result file and create result object.
 
-# Help on each function can be accessed by: "help(COCO.function)"
 
 import json
 import datetime
@@ -129,7 +128,10 @@ class VQA:
 				anns = self.questions['questions']
 		else:
 			if not len(quesIds) == 0:
-				anns = [self.qa[quesId] for quesId in quesIds if quesId in self.qa]
+				if len(self.dataset) > 0:
+					anns = [self.qa[quesId] for quesId in quesIds if quesId in self.qa]
+				else:
+					anns = [self.qqa[quesId] for quesId in quesIds if quesId in self.qqa]
 			else:
 				anns = self.dataset['annotations']
 			anns = anns if len(quesTypes) == 0 else [ann for ann in anns if ann['question_type'] in quesTypes]

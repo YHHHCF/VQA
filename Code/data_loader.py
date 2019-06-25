@@ -80,7 +80,8 @@ class VqaDataset(Dataset):
         return
 
     def __len__(self):
-        return len(self.vqa.dataset['annotations'])
+        # return len(self.vqa.dataset['annotations'])
+        return len(self.qIDs)
 
     # return the input image, input question and answers corresponding to idx
     def __getitem__(self, idx):
@@ -90,7 +91,11 @@ class VqaDataset(Dataset):
         q_id = self.qIDs[idx]
 
         # get image
+        # print("debug: ", idx, q_id)
+        # print("debug 1: ", self.vqa.getImgIds(quesIds=[q_id]))
         img_id = self.vqa.getImgIds(quesIds=[q_id])[0]
+        if len(self.vqa.getImgIds(quesIds=[q_id])) > 1:
+            print("debug")
         item['img'] = torch.load(os.path.join(self.img_dir, 'pre_process', str(img_id) + '.pt'))
 
         # get questions
@@ -100,8 +105,9 @@ class VqaDataset(Dataset):
         item['ques'] = ques_one_hot
 
         # get answers
-        ans = self.ans_idxs[q_id]
-        item['ans'] = torch.tensor(ans)
+        if self.ans_idxs:
+            ans = self.ans_idxs[q_id]
+            item['ans'] = torch.tensor(ans)
 
         # put question id into item, used for evaluation
         item['qID'] = q_id

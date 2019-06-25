@@ -19,6 +19,10 @@ def run_experiment():
         path = cf4.ckpt_path
         model, optimizer = load_ckpt(model, optimizer, path)
 
+    # for param_group in optimizer.param_groups:
+    #   param_group['lr'] = cf4.lr
+    #   param_group['weight_decay'] = cf4.wd
+
     # dataset for train/val VQA
     train_set = VqaDataset(var.train_img_path, var.train_img_name_pattern,
                                var.train_ques_path, var.train_ques_idx_path,
@@ -37,4 +41,4 @@ def run_experiment():
 
     writer = SummaryWriter()
 
-    train(model, optimizer, criterion, train_loader, val_loader, writer, cf4.epoch, experiment=4)
+    train(model, optimizer, criterion, train_loader, val_loader, writer, cf4.epoch, cf4.pt_epoch, experiment=4)

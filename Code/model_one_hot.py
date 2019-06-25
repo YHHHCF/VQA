@@ -15,7 +15,7 @@ class BaselineModel(nn.Module):
         self.ques_conv = nn.Conv1d(var.top_vocab_num + 2, 256, 1, 1)  # convert Q to 256-dim vector
         self.ques_pad = nn.ZeroPad2d((1, 1))  # pad on L dimension
 
-        self.ques_filter = nn.Conv1d(256, 256, 3, 1, 1)  # convert Q to 256-dim vector
+        self.ques_filter = nn.Conv1d(256, 256, 3, 1, 1, groups=256)  # convert Q to 256-dim vector
 
         # init the second order output as 0(skip it at first)
         self.filter_bn = nn.BatchNorm1d(num_features=256)
